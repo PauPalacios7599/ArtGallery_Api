@@ -4,12 +4,22 @@ const artistSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
-    biography: String,
+    biography: {
+      type: String,
+      trim: true
+    },
     image: {
-      public_id: String,
-      secure_url: String
+      public_id: {
+        type: String,
+        required: true
+      },
+      secure_url: {
+        type: String,
+        required: true
+      }
     }
   },
   {
