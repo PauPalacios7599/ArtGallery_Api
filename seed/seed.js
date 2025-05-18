@@ -1,4 +1,4 @@
-// seed/seed.js
+
 require('dotenv').config()
 const mongoose = require('mongoose')
 const Artist = require('../models/Artist')
@@ -38,7 +38,7 @@ const seedDB = async () => {
     await mongoose.connect(process.env.MONGO_URI)
     console.log('🟢 Conectado a MongoDB')
 
-    await Artist.deleteMany() // Limpia colección
+    await Artist.deleteMany() 
     console.log('🧹 Artistas eliminados')
 
     await Artist.insertMany(seedArtists)

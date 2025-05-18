@@ -1,21 +1,16 @@
 const Artist = require('../models/Artist')
-const cloudinary = require('../config/cloudinary')
+const { uploadImage, deleteImage } = require('../utils/cloudinary')
 
 // Crear artista
 const createArtist = async (req, res) => {
   try {
     const { name, biography } = req.body
-    const file = req.file
-
-    const result = await cloudinary.uploader.upload(file.path)
+    const image = await uploadImage(req.file?.path)
 
     const newArtist = new Artist({
       name,
       biography,
-      image: {
-        public_id: result.public_id,
-        secure_url: result.secure_url
-      }
+      image
     })
 
     await newArtist.save()
@@ -41,6 +36,7 @@ const getArtistById = async (req, res) => {
     const artist = await Artist.findById(req.params.id)
     if (!artist)
       return res.status(404).json({ message: 'Artista no encontrado' })
+
     res.status(200).json(artist)
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener artista', error })
@@ -56,14 +52,10 @@ const updateArtist = async (req, res) => {
     if (!artist)
       return res.status(404).json({ message: 'Artista no encontrado' })
 
-    // Si hay imagen nueva, borra la anterior
     if (req.file) {
-      await cloudinary.uploader.destroy(artist.image.public_id)
-      const result = await cloudinary.uploader.upload(req.file.path)
-      artist.image = {
-        public_id: result.public_id,
-        secure_url: result.secure_url
-      }
+      await deleteImage(artist.image.public_id)
+      const image = await uploadImage(req.file.path)
+      artist.image = image
     }
 
     artist.name = name || artist.name
@@ -83,7 +75,7 @@ const deleteArtist = async (req, res) => {
     if (!artist)
       return res.status(404).json({ message: 'Artista no encontrado' })
 
-    await cloudinary.uploader.destroy(artist.image.public_id)
+    await deleteImage(artist.image.public_id)
     res.status(200).json({ message: 'Artista eliminado' })
   } catch (error) {
     res.status(500).json({ message: 'Error al eliminar artista', error })
